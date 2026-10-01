@@ -74,7 +74,7 @@ async function send(text){
     const d=await r.json();
     if(!d.reply)throw new Error(d.error);
     wait.remove();history.push({role:'model',text:d.reply});add('bot',d.reply);speak(d.reply);
-  }catch(e){wait.remove();add('bot','மன்னிக்கவும், இணைப்பில் பிரச்சனை. மீண்டும் முயற்சிக்கவும்.')}
+  }catch(e){wait.remove();add('bot','Error: '+e.message)}}
 }
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(SR){
