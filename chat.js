@@ -18,19 +18,29 @@ module.exports = async (req, res) => {
       role: m.role === "user" ? "user" : "model",
       parts: [{ text: String(m.text).slice(0, 1000) }],
     }));
-    const r = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY || "" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM }] },
-          contents,
-          generationConfig: { temperature: 0.4, maxOutputTokens: 400, thinkingConfig: { thinkingBudget: 0 } },
-        }),
-      }
-    );
-    const d = await r.json();
+    const body = JSON.stringify({
+      systemInstruction: { parts: [{ text: SYSTEM }] },
+      contents,
+      generationConfig: { temperature: 0.4, maxOutputTokens: 1500 },
+    });
+    const models = ["gemini-flash-latest", "gemini-flash-lite-latest", "gemini-flash-latest"];
+    let r, raw, d;
+    for (let i = 0; i < models.length; i++) {
+      r = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/" + models[i] + ":generateContent",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY || "" },
+          body,
+        }
+      );
+      raw = await r.text();
+      try { d = JSON.parse(raw); } catch (e) { d = null; }
+      if (r.ok && d) break;
+      if (r.status !== 503 && r.status !== 429 && r.status !== 500) break;
+      await new Promise(x => setTimeout(x, 1200));
+    }
+    if (!d) return res.status(500).json({ error: "Google " + r.status + ": " + String(raw).slice(0, 200) });
     const reply = d?.candidates?.[0]?.content?.parts?.map(p => p.text).join("") || "";
     if (!reply) return res.status(500).json({ error: "Google " + r.status + ": " + JSON.stringify(d).slice(0, 300) });
     res.status(200).json({ reply });
@@ -38,3 +48,4 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: String(e) });
   }
 };
+
