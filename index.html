@@ -74,7 +74,8 @@ async function send(text){
     const d=await r.json();
     if(!d.reply)throw new Error(d.error);
     wait.remove();history.push({role:'model',text:d.reply});add('bot',d.reply);speak(d.reply);
-  }}catch(e){wait.remove();add('bot','Error: '+e.message)}
+  }catch(e){wait.remove();add('bot','Error: '+e.message)}
+}
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(SR){
   rec=new SR();rec.lang='ta-IN';rec.interimResults=false;
