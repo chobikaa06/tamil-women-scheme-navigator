@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
       parts: [{ text: String(m.text).slice(0, 1000) }],
     }));
     const r = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
       {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY || "" },
@@ -30,7 +30,9 @@ module.exports = async (req, res) => {
         }),
       }
     );
-    const d = await r.json();
+    const raw = await r.text();
+    let d;
+    try { d = JSON.parse(raw); } catch (e) { return res.status(500).json({ error: "Google " + r.status + ": " + raw.slice(0, 200) }); }
     const reply = d?.candidates?.[0]?.content?.parts?.map(p => p.text).join("") || "";
     if (!reply) return res.status(500).json({ error: "Google " + r.status + ": " + JSON.stringify(d).slice(0, 300) });
     res.status(200).json({ reply });
@@ -38,4 +40,3 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: String(e) });
   }
 };
-
