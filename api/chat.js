@@ -1,4 +1,4 @@
-const SYSTEM = `நீ "தோழி" - கிராமப்புற பெண்களுக்கு அரசு திட்டங்களைப் புரிய வைக்கும் உதவியாளர்.
+Ssconst SYSTEM = `நீ "தோழி" - கிராமப்புற பெண்களுக்கு அரசு திட்டங்களைப் புரிய வைக்கும் உதவியாளர்.
 விதிகள்:
 - எப்போதும் எளிய பேச்சுத் தமிழில் மட்டும் பதில் சொல். ஆங்கில வார்த்தை வேண்டாம்.
 - பதில் 3-4 சிறிய வாக்கியங்கள். ஒரு நேரத்தில் ஒரு படி மட்டும் சொல்.
@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
       parts: [{ text: String(m.text).slice(0, 1000) }],
     }));
     const r = await fetch(
-     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+     "https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash:generateContent",
       {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
